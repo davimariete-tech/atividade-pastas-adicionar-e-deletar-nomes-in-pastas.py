@@ -1,107 +1,121 @@
 import os
-os.system("cls")
-
+import time
 from dataclasses import dataclass
-
-@dataclass 
-class Funcionario:
-    nome: str
-    data_de_adm: str
-    matricula: str
-    endereco: str
 
 @dataclass
 class Cliente:
     nome: str
-    data_de_nascimento: str
-    endereco: str
+    email: str
+    telefone: str
 
+    def mostrar_dados(self):
+        print(f"Nome: {self.nome}\nE-mail: {self.email}\nTelefone: {self.telefone}")
 
-# Listas separadas
-lista_funcionarios = []
-lista_clientes = []
+def verificar_lista_vazia(lista_clientes):
+    if not lista_clientes:
+        print("\nNão há clientes cadastrados.")
+        return True
+    return False
 
-QUANTIDADE_FUNCIONARIOS = 3
-QUANTIDADE_CLIENTES = 3
+def adicionar_cliente(lista_clientes):
+    print("\n--Adicionar novo cliente--")
+    nome = input("Digite seu nome: ")
+    email = input("Digite seu e-mail: ")
+    telefone = input("Digite seu telefone: ")
 
-# Cadastro de funcionários
-for i in range(QUANTIDADE_FUNCIONARIOS):
-    print(f"\n--- FUNCIONÁRIO {i+1} ---")
-    funcionario = Funcionario(
-        nome=input("Informe o nome: "),
-        data_de_adm=input("Informe data de admissão: "),
-        matricula=input("Informe o número de matrícula: "),
-        endereco=input("Informe o endereço: ")
-    )
-    lista_funcionarios.append(funcionario)
+    novo_cliente = Cliente(nome=nome, email=email, telefone=telefone)
+    lista_clientes.append(novo_cliente)
+    print(f"\nCliente {nome} adicionado com sucesso!")
 
-print()
+def encontrar_cliente_por_nome(lista_clientes, nome_buscar):
+    nome_buscar_lower = nome_buscar.lower()
+    for cliente in lista_clientes:
+        if cliente.nome.lower() == nome_buscar_lower:
+            return cliente
+    return None
 
-# Cadastro de clientes
-for i in range(QUANTIDADE_CLIENTES):
-    print(f"\n--- CLIENTE {i+1} ---")
-    cliente = Cliente(
-        nome=input("Informe o nome: "),
-        data_de_nascimento=input("Informe a data de nascimento: "),
-        endereco=input("Informe o endereço: ")
-    )
-    lista_clientes.append(cliente)
+def mostrar_todos_clientes(lista_clientes):
+    if verificar_lista_vazia(lista_clientes):
+        return
 
-print()
+    print("\n--Lista de clientes--")
+    for cliente in lista_clientes:
+        cliente.mostrar_dados()
 
-# Salvando em arquivo CSV
-arquivo_nome = "dados_funcionario.csv"
+def atualizar_cliente(lista_clientes):
+    print("\n--- Atualizar dados do cliente ---")
 
-with open(arquivo_nome, "a", encoding="utf-8") as arquivo:
-    arquivo.write("FUNCIONARIOS:\n")
-    for f in lista_funcionarios:
-        arquivo.write(f"{f.nome},{f.data_de_adm},{f.matricula},{f.endereco}\n")
+    if verificar_lista_vazia(lista_clientes):
+        return
 
-    arquivo.write("\nCLIENTES:\n")
-    for c in lista_clientes:
-        arquivo.write(f"{c.nome},{c.data_de_nascimento},{c.endereco}\n")
+    nome_buscar = input("\nDigite o nome do cliente que deseja atualizar: ")
+    cliente_para_atualizar = encontrar_cliente_por_nome(lista_clientes, nome_buscar)
 
-print("\nDados salvos com sucesso!")
+    if cliente_para_atualizar:
+        print("\nCliente encontrado!")
 
-# ==================================================
-#      LENDO O ARQUIVO E EXIBINDO OS REGISTROS
-# ==================================================
+        print("\nDigite os novos dados ou deixe em branco para manter o valor atual.")
 
-lista_todos_funcionarios = []
+        print(f"Nome atual: {cliente_para_atualizar.nome}")
+        novo_nome = input("Novo nome: ")
 
-try:
-    with open(arquivo_nome, "r", encoding="utf-8") as arquivo:
-        linhas = arquivo.readlines()
+        print(f"E-mail atual: {cliente_para_atualizar.email}")
+        novo_email = input("Novo e-mail: ")
 
-        print("\n--- LENDO DADOS DO ARQUIVO ---")
+        print(f"Telefone atual: {cliente_para_atualizar.telefone}")
+        novo_telefone = input("Novo telefone: ")
 
-        for linha in linhas:
-            linha = linha.strip()
+        if novo_nome:
+            cliente_para_atualizar.nome = novo_nome
+        if novo_email:
+            cliente_para_atualizar.email = novo_email
+        if novo_telefone:
+            cliente_para_atualizar.telefone = novo_telefone
 
-            # Ignora títulos
-            if linha == "FUNCIONARIOS:" or linha == "" or linha == "CLIENTES:":
-                continue
+        print("\nDados atualizados com sucesso!")
+    else:
+        print(f"\nCliente com nome '{nome_buscar}' não encontrado.")
 
-            # Divide os dados
-            dados = linha.split(",")
+def menu():
+    lista_clientes = []
 
-            # Detecta automaticamente se é funcionário ou cliente pelo número de campos
-            if len(dados) == 4:  # Funcionário
-                nome, data_adm, matricula, endereco = dados
-                lista_todos_funcionarios.append(
-                    Funcionario(nome, data_adm, matricula, endereco)
-                )
+    while True:
+        os.system("cls")  
+        print("1. Adicionar Cliente")
+        print("2. Mostrar Todos os Clientes")
+        print("3. Encontrar Cliente")
+        print("4. Atualizar Cliente")
+        print("5. Sair")
+        
+        opcao = input("\nEscolha uma opção: ")
 
-            elif len(dados) == 3:  # Cliente
-                nome, data_nasc, endereco = dados
-                lista_todos_funcionarios.append(
-                    Cliente(nome, data_nasc, endereco)
-                )
+        if opcao == '1':
+            adicionar_cliente(lista_clientes)
+            time.sleep(2)
 
-    # Exibe tudo lido
-    print("\n--- DADOS CARREGADOS DO ARQUIVO ---")
-    for item in lista_todos_funcionarios:
-        print(item)
+        elif opcao == '2':
+            mostrar_todos_clientes(lista_clientes)
+            input("\nPressione Enter para continuar...")
 
-except FileNotFoundError:
-    print("Erro: arquivo não encontrado.")
+        elif opcao == '3':
+            nome_buscar = input("Digite o nome do cliente: ")
+            cliente = encontrar_cliente_por_nome(lista_clientes, nome_buscar)
+            if cliente:
+                cliente.mostrar_dados()
+            else:
+                print("\nCliente não encontrado.")
+            input("\nPressione Enter para continuar...")
+
+        elif opcao == '4':
+            atualizar_cliente(lista_clientes)
+            input("\nPressione Enter para continuar...")
+
+        elif opcao == '5':
+            print("Saindo...")
+            break
+
+        else:
+            print("Opção inválida!")
+            time.sleep(1)
+
+menu()
